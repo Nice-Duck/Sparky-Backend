@@ -10,4 +10,7 @@ public class AuthRequest {
     private String email;
     @ApiModelProperty(value = "비밀번호", example = "kmj1234!", required = true)
     private String pwd;
+    @ApiModelProperty(value = "닉네임", example = "kingmj", required = true)
+    private String nickname;
+
 }
