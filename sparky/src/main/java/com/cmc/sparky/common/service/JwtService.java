@@ -6,11 +6,13 @@ import com.cmc.sparky.common.domain.Token;
 import com.cmc.sparky.common.dto.TokenDto;
 import com.cmc.sparky.common.exception.TokenExpiredException;
 import com.cmc.sparky.common.repository.TokenRepository;
+import com.cmc.sparky.user.domain.User;
 import io.jsonwebtoken.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.lang.reflect.Member;
 import java.time.Duration;
 import java.util.Date;
 import java.util.HashMap;
@@ -28,13 +30,13 @@ public class JwtService {
     private final TokenRepository tokenRepository;
     private final AccountRepository accountRepository;
 
-    public TokenDto createToken(Account account) {
+    public TokenDto createToken(User user) {
         Map<String, Object> headers=new HashMap<>();
         headers.put("typ","JWT");
         headers.put("alg","HS256");
-
+        Account account=accountRepository.findByUser(user);
         Map<String, Object> payloads = new HashMap<>();
-        payloads.put("Key", account.getId());
+        payloads.put("Key", user.getId());
         payloads.put("Email",account.getEmail());
 
         Date now = new Date();
@@ -93,7 +95,7 @@ public class JwtService {
         headers.put("alg","HS256");
 
         Login user=loginRepository.findByEmail(email);
-        Member member=memberRepository.findByLogin(user);
+        User member=memberRepository.findByLogin(user);
 
         Map<String, Object> payloads = new HashMap<>();
         payloads.put("Key", member.getId());
