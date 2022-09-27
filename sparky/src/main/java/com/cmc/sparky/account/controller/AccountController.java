@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@CrossOrigin("*")
 public class AccountController {
     private final AccountService accountService;
     private final MailService mailService;

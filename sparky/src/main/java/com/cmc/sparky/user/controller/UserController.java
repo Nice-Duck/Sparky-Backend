@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@CrossOrigin("*")
 public class UserController {
     private final UserService userService;
     @ApiOperation(value="중복확인",notes = "<strong>닉네임 중복을 확인한다.</strong>")
