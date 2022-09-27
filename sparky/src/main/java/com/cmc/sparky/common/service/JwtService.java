@@ -64,7 +64,7 @@ public class JwtService {
                 .getBody()
                 .get("Email").toString();
     }
-    public Long getMemberId(String token){
+    public Long getUserId(String token){
         return Long.parseLong(Jwts.parser().setSigningKey(ac_secret_key)
                 .parseClaimsJws(token)
                 .getBody()
