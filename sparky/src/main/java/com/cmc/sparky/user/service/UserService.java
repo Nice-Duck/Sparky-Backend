@@ -1,5 +1,6 @@
 package com.cmc.sparky.user.service;
 
+import com.cmc.sparky.user.domain.User;
 import com.cmc.sparky.user.exception.DuplicateNameException;
 import com.cmc.sparky.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -14,5 +15,8 @@ public class UserService {
         if(userRepository.existsByNickname(name)){
             throw new DuplicateNameException("동일 이름이 존재합니다.");
         }
+    }
+    public User findUser(Long id){
+        return userRepository.findById(id).orElse(null);
     }
 }
