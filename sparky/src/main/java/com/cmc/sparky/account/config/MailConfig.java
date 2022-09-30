@@ -1,5 +1,6 @@
 package com.cmc.sparky.account.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -9,12 +10,18 @@ import java.util.Properties;
 
 @Configuration
 public class MailConfig {
+    @Value("${spring.mail.host}")
+    private String host;
+    @Value("${spring.mail.username}")
+    private String email;
+    @Value("${spring.mail.password}")
+    private String password;
     @Bean
     public JavaMailSender javaMailService() {
         JavaMailSenderImpl javaMailSender = new JavaMailSenderImpl();
-        javaMailSender.setHost("smtp.naver.com");
-        javaMailSender.setUsername("user email");
-        javaMailSender.setPassword("user password");
+        javaMailSender.setHost(host);
+        javaMailSender.setUsername(email);
+        javaMailSender.setPassword(password);
         javaMailSender.setPort(465);
         javaMailSender.setJavaMailProperties(getMailProperties());
         return javaMailSender;
