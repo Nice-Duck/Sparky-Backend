@@ -13,7 +13,7 @@ import java.util.Map;
 public class JwtExceptionHandler {
     @ExceptionHandler(TokenExpiredException.class)
     public ResponseEntity<Map<String, String>> TokenExpried(Exception e){
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(Collections.singletonMap("message",e.getMessage()));
     }
 }

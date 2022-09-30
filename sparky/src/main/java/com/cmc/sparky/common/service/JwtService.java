@@ -3,10 +3,12 @@ package com.cmc.sparky.common.service;
 import com.cmc.sparky.account.domain.Account;
 import com.cmc.sparky.account.repository.AccountRepository;
 import com.cmc.sparky.common.domain.Token;
+import com.cmc.sparky.common.dto.AcTokenResponse;
 import com.cmc.sparky.common.dto.TokenDto;
 import com.cmc.sparky.common.exception.TokenExpiredException;
 import com.cmc.sparky.common.repository.TokenRepository;
 import com.cmc.sparky.user.domain.User;
+import com.cmc.sparky.user.repository.UserRepository;
 import io.jsonwebtoken.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,6 +31,7 @@ public class JwtService {
     private Long refreshExpired=Duration.ofDays(30).toMillis(); //30 days for test
     private final TokenRepository tokenRepository;
     private final AccountRepository accountRepository;
+    private final UserRepository userRepository;
 
     public TokenDto createToken(User user) {
         Map<String, Object> headers=new HashMap<>();
@@ -77,7 +80,7 @@ public class JwtService {
             throw new TokenExpiredException("Token has expired");
         }
     }
-    /*
+
     public AcTokenResponse refreshCompare(String token){
         String email=Jwts.parser().setSigningKey(re_secret_key)
                 .parseClaimsJws(token)
@@ -87,18 +90,19 @@ public class JwtService {
         if(temp.getRefreshToken()==null){
             throw new TokenExpiredException("Token has expired");
         }
+        /*
         if(!temp.getRefreshToken().equals(token)){
             throw new TokenMatchException("Invalid token");
-        }
+        }*/
         Map<String, Object> headers=new HashMap<>();
         headers.put("typ","JWT");
         headers.put("alg","HS256");
 
-        Login user=loginRepository.findByEmail(email);
-        User member=memberRepository.findByLogin(user);
+        Account account=accountRepository.findByEmail(email);
+        User user=account.getUser();
 
         Map<String, Object> payloads = new HashMap<>();
-        payloads.put("Key", member.getId());
+        payloads.put("Key", user.getId());
         payloads.put("Email",email);
         Date now = new Date();
         return new AcTokenResponse(Jwts.builder()
@@ -109,6 +113,4 @@ public class JwtService {
                 .signWith(SignatureAlgorithm.HS256,ac_secret_key)
                 .compact());
     }
-
-     */
 }
