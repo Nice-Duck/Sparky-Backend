@@ -2,6 +2,7 @@ package com.cmc.sparky.account.service;
 
 import com.cmc.sparky.account.domain.Account;
 import com.cmc.sparky.account.dto.AuthRequest;
+import com.cmc.sparky.account.dto.LoginRequest;
 import com.cmc.sparky.account.exception.DuplicateEmailException;
 import com.cmc.sparky.account.exception.IncorrectException;
 import com.cmc.sparky.account.exception.WithdrawException;
@@ -25,10 +26,10 @@ public class AccountService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
 
-    public TokenResponse checkUser(AuthRequest authRequest){
-        Account account=accountRepository.findByEmail(authRequest.getEmail());
-        if(!accountRepository.existsByEmail(authRequest.getEmail()) ||
-                !passwordEncoder.matches(authRequest.getPwd(),account.getPassword())){
+    public TokenResponse checkUser(LoginRequest loginRequest){
+        Account account=accountRepository.findByEmail(loginRequest.getEmail());
+        if(!accountRepository.existsByEmail(loginRequest.getEmail()) ||
+                !passwordEncoder.matches(loginRequest.getPwd(),account.getPassword())){
             throw new IncorrectException("아이디 또는 패스워드가 틀립니다.");
         }
         if(account.getUsed()==0){
