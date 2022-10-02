@@ -5,6 +5,7 @@ import com.cmc.sparky.account.dto.MailCheckRequest;
 import com.cmc.sparky.account.dto.MailSendRequest;
 import com.cmc.sparky.account.exception.WithdrawException;
 import com.cmc.sparky.account.repository.MailRepository;
+import com.cmc.sparky.common.dto.SuccessResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -21,7 +22,8 @@ public class MailService {
     private final MailRepository mailRepository;
     @Value("${spring.mail.username}")
     private String email;
-    public void sendMail(MailSendRequest mailSendRequest){
+    public SuccessResponse sendMail(MailSendRequest mailSendRequest){
+        SuccessResponse successResponse=new SuccessResponse();
         MimeMessage message=mailSender.createMimeMessage();
         String toAddress=mailSendRequest.getEmail();
         try {
@@ -44,11 +46,29 @@ public class MailService {
         }catch(Exception e){
             e.printStackTrace();
         }
+        successResponse.setCode("0000");
+        successResponse.setMessage("인증 번호를 전송했습니다.");
+        successResponse.setResult(null);
+        return successResponse;
     }
-    public void checkMail(MailCheckRequest mailCheckRequest){
+    public SuccessResponse checkMail(MailCheckRequest mailCheckRequest){
+        SuccessResponse successResponse=new SuccessResponse();
         Mail mailNumber=mailRepository.findById(mailCheckRequest.getEmail()).orElse(null);
-        if(!mailNumber.getNumber().equals(mailCheckRequest.getNumber())){
-            throw new WithdrawException("인증번호가 일치하지 않습니다.");
+        if(mailNumber==null){
+            successResponse.setCode("0003");
+            successResponse.setMessage("인증 시간이 초과되었습니다.");
+            successResponse.setResult(null);
         }
+        else if(!mailNumber.getNumber().equals(mailCheckRequest.getNumber())){
+            successResponse.setCode("0004");
+            successResponse.setMessage("메일 인증 번호가 일치하지 않습니다.");
+            successResponse.setResult(null);
+        }
+        else {
+            successResponse.setCode("0000");
+            successResponse.setMessage("메일 인증에 성공했습니다.");
+            successResponse.setResult(null);
+        }
+        return successResponse;
     }
 }
