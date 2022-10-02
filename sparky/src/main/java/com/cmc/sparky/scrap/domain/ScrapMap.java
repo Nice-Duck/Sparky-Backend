@@ -1,5 +1,6 @@
 package com.cmc.sparky.scrap.domain;
 
+import com.cmc.sparky.user.domain.User;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -16,6 +17,9 @@ public class ScrapMap {
     @GeneratedValue
     @Column(name="mapId")
     private Long id;
+    @ManyToOne
+    @JoinColumn(name="userId")
+    private User user;
     @ManyToOne
     @JoinColumn(name="scpId")
     private Scrap scrap;
