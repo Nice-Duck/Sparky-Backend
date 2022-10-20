@@ -27,30 +27,24 @@ public class ScrapController {
         Long userId=jwtService.getUserId(token);
         return ResponseEntity.ok().body(scrapService.saveScrap(userService.findUser(userId),scrapRequest));
     }
-    /*
+
     @ApiOperation(value="스크랩 불러오기",notes = "<strong>자신의 스크랩을 불러온다.</strong>")
     @RequestMapping(value="/api/v1/scraps", method = RequestMethod.GET)
-    public ResponseEntity scrapLoad(@RequestHeader("Authorization") String token,
-                                    @RequestParam("name") String name){
-        return ResponseEntity.ok().build();
+    public ResponseEntity<SuccessResponse> scrapLoad(@RequestHeader("Authorization") String token){
+        jwtService.validateToken(token);
+        Long uid=jwtService.getUserId(token);
+        return ResponseEntity.ok().body(scrapService.loadScraps(uid));
     }
-    */
 
-    @ApiOperation(value="최근 사용 태그 조회",notes = "<strong>자신이 사용한 최근 태그 최대 5개 출력 </strong>")
-    @RequestMapping(value="/api/v1/tags/last", method = RequestMethod.GET)
+
+    @ApiOperation(value="모든 태그 조회",notes = "<strong>자신이 등록한 태그 전부 조회 (최신순)</strong>")
+    @RequestMapping(value="/api/v1/tags", method = RequestMethod.GET)
     public ResponseEntity<SuccessResponse> curtagLoad(@RequestHeader("Authorization") String token){
         jwtService.validateToken(token);
         Long uid=jwtService.getUserId(token);
         return ResponseEntity.ok().body(scrapService.loadLastTags(uid));
     }
 
-    @ApiOperation(value="태그 조회",notes = "<strong>태크 조회 </strong>")
-    @RequestMapping(value="/api/v1/tags", method = RequestMethod.GET)
-    public ResponseEntity<SuccessResponse> tagLoad(@RequestHeader("Authorization") String token,
-                                                 @RequestParam("tag")String tag){
-        jwtService.validateToken(token);
-        return ResponseEntity.ok().body(scrapService.loadTag(tag));
-    }
     @ApiOperation(value="태그 저장하기",notes = "<strong>태그가 없는 경우 저장함</strong>")
     @RequestMapping(value="/api/v1/tags", method = RequestMethod.POST)
     public ResponseEntity<SuccessResponse> tagSave(@RequestHeader("Authorization") String token,
