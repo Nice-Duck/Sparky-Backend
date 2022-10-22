@@ -3,9 +3,8 @@ package com.cmc.sparky.account.service;
 import com.cmc.sparky.account.domain.Mail;
 import com.cmc.sparky.account.dto.MailCheckRequest;
 import com.cmc.sparky.account.dto.MailSendRequest;
-import com.cmc.sparky.account.exception.WithdrawException;
 import com.cmc.sparky.account.repository.MailRepository;
-import com.cmc.sparky.common.dto.SuccessResponse;
+import com.cmc.sparky.common.dto.ServerResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -22,8 +21,8 @@ public class MailService {
     private final MailRepository mailRepository;
     @Value("${spring.mail.username}")
     private String email;
-    public SuccessResponse sendMail(MailSendRequest mailSendRequest){
-        SuccessResponse successResponse=new SuccessResponse();
+    public ServerResponse sendMail(MailSendRequest mailSendRequest){
+        ServerResponse serverResponse =new ServerResponse();
         MimeMessage message=mailSender.createMimeMessage();
         String toAddress=mailSendRequest.getEmail();
         try {
@@ -46,29 +45,29 @@ public class MailService {
         }catch(Exception e){
             e.printStackTrace();
         }
-        successResponse.setCode("0000");
-        successResponse.setMessage("인증 번호를 전송했습니다.");
-        successResponse.setResult(null);
-        return successResponse;
+        serverResponse.setCode("0000");
+        serverResponse.setMessage("인증 번호를 전송했습니다.");
+        serverResponse.setResult(null);
+        return serverResponse;
     }
-    public SuccessResponse checkMail(MailCheckRequest mailCheckRequest){
-        SuccessResponse successResponse=new SuccessResponse();
+    public ServerResponse checkMail(MailCheckRequest mailCheckRequest){
+        ServerResponse serverResponse =new ServerResponse();
         Mail mailNumber=mailRepository.findById(mailCheckRequest.getEmail()).orElse(null);
         if(mailNumber==null){
-            successResponse.setCode("0003");
-            successResponse.setMessage("인증 시간이 초과되었습니다.");
-            successResponse.setResult(null);
+            serverResponse.setCode("0003");
+            serverResponse.setMessage("인증 시간이 초과되었습니다.");
+            serverResponse.setResult(null);
         }
         else if(!mailNumber.getNumber().equals(mailCheckRequest.getNumber())){
-            successResponse.setCode("0004");
-            successResponse.setMessage("메일 인증 번호가 일치하지 않습니다.");
-            successResponse.setResult(null);
+            serverResponse.setCode("0004");
+            serverResponse.setMessage("메일 인증 번호가 일치하지 않습니다.");
+            serverResponse.setResult(null);
         }
         else {
-            successResponse.setCode("0000");
-            successResponse.setMessage("메일 인증에 성공했습니다.");
-            successResponse.setResult(null);
+            serverResponse.setCode("0000");
+            serverResponse.setMessage("메일 인증에 성공했습니다.");
+            serverResponse.setResult(null);
         }
-        return successResponse;
+        return serverResponse;
     }
 }
