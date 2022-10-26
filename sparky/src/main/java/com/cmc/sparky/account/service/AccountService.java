@@ -64,6 +64,7 @@ public class AccountService {
         if(accountRepository.existsByEmail(email))
             throw new DuplicateEmailException("이메일이 중복되었습니다.");
         serverResponse.setMessage("가입 가능한 메일입니다.");
+        serverResponse.setResult(null);
         return serverResponse;
     }
     public ServerResponse outUser(String email){
@@ -71,6 +72,7 @@ public class AccountService {
         user.setUsed(0);
         accountRepository.save(user);
         serverResponse.setMessage("회워탈퇴에 성공했습니다.");
+        serverResponse.setResult(null);
         return serverResponse;
     }
 }
