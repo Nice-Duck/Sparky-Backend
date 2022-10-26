@@ -1,5 +1,6 @@
 package com.cmc.sparky.scrap.exception;
 
+import com.cmc.sparky.common.dto.ServerResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -10,9 +11,12 @@ import java.util.Map;
 
 @ControllerAdvice("com.cmc.sparky.scrap")
 public class ScrapExceptionHandler {
-    @ExceptionHandler(NoneTagException.class)
-    public ResponseEntity<Map<String, String>> NotFoundTagException(Exception e){
-        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(Collections.singletonMap("message",e.getMessage()));
+    private ServerResponse serverResponse=new ServerResponse();
+    @ExceptionHandler(DupTagException.class)
+    public ResponseEntity<ServerResponse> NotFoundTagException(Exception e){
+        serverResponse.setCode("0008");
+        serverResponse.setMessage(e.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(serverResponse);
     }
 }
