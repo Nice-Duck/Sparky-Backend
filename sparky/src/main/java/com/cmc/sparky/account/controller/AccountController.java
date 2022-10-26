@@ -7,6 +7,8 @@ import com.cmc.sparky.account.dto.MailSendRequest;
 import com.cmc.sparky.account.service.AccountService;
 import com.cmc.sparky.account.service.MailService;
 import com.cmc.sparky.common.dto.ServerResponse;
+import com.cmc.sparky.common.service.JwtService;
+import com.cmc.sparky.scrap.dto.TagRequest;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 public class AccountController {
     private final AccountService accountService;
     private final MailService mailService;
+    private final JwtService jwtService;
     @ApiOperation(value="중복확인",notes = "<strong>이메일 중복을 확인한다.</strong>")
     @RequestMapping(value="/api/v1/accounts/register", method = RequestMethod.GET)
     public ResponseEntity<ServerResponse> duplicationUser(@RequestParam("email") String email){
@@ -43,13 +46,15 @@ public class AccountController {
     public ResponseEntity<ServerResponse> loginUser(@RequestBody LoginRequest loginRequest){
         return ResponseEntity.ok().body(accountService.checkUser(loginRequest));
     }
-    /*
+
     @ApiOperation(value="회원탈퇴",notes = "<strong>회원 탈퇴</strong>")
     @RequestMapping(value="/api/v1/accounts", method = RequestMethod.DELETE)
-    public ResponseEntity<ServerResponse> deleteUser(@RequestBody AuthRequest authRequest){
-        accountService.outUser(authRequest);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<ServerResponse> deleteUser(@RequestHeader("Authorization") String token){
+        jwtService.validateToken(token);
+        String email=jwtService.getUser(token);
+        return ResponseEntity.ok().body(accountService.outUser(email));
     }
+    /*
     @ApiOperation(value="비밀번호수정",notes = "<strong>회원수정</strong>")
     @RequestMapping(value="/api/v1/accounts", method = RequestMethod.PATCH)
     public ResponseEntity updateUser(@RequestBody AuthRequest authRequest){

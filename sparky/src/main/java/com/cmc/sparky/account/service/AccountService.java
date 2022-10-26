@@ -3,7 +3,10 @@ package com.cmc.sparky.account.service;
 import com.cmc.sparky.account.domain.Account;
 import com.cmc.sparky.account.dto.AuthRequest;
 import com.cmc.sparky.account.dto.LoginRequest;
-import com.cmc.sparky.account.exception.IncorrectException;
+import com.cmc.sparky.account.exception.DuplicateEmailException;
+import com.cmc.sparky.account.exception.EmailException;
+import com.cmc.sparky.account.exception.PasswordException;
+import com.cmc.sparky.account.exception.WithdrawException;
 import com.cmc.sparky.account.repository.AccountRepository;
 import com.cmc.sparky.common.dto.ServerResponse;
 import com.cmc.sparky.common.dto.TokenDto;
@@ -21,37 +24,27 @@ public class AccountService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
-
+    private ServerResponse serverResponse =new ServerResponse();
     public ServerResponse checkUser(LoginRequest loginRequest){
-        ServerResponse serverResponse =new ServerResponse();
         Account account=accountRepository.findByEmail(loginRequest.getEmail());
 
         if(!accountRepository.existsByEmail(loginRequest.getEmail()) ){
-            serverResponse.setCode("0004");
-            serverResponse.setMessage("없는 이메일입니다.");
-            serverResponse.setResult(null);
+            throw new EmailException("없는 이메일입니다.");
         }
-        else if(!passwordEncoder.matches(loginRequest.getPwd(),account.getPassword())){
-            serverResponse.setCode("0005");
-            serverResponse.setMessage("비밀번호가 일치하지 않습니다.");
-            serverResponse.setResult(null);
+        if(!passwordEncoder.matches(loginRequest.getPwd(),account.getPassword())){
+            throw new PasswordException("비밀번호가 일치하지 않습니다.");
         }
-        else if(account.getUsed()==0){
-            serverResponse.setCode("0006");
-            serverResponse.setMessage("회원 탈퇴한 이메일입니다.");
-            serverResponse.setResult(null);
+        if(account.getUsed()==0){
+            throw new WithdrawException("회원 탈퇴한 이메일입니다.");
         }
-        else {
-            TokenDto tokens = jwtService.createToken(account.getUser());
-            serverResponse.setCode("0000");
-            serverResponse.setMessage("로그인에 성공했습니다.");
-            serverResponse.setResult(tokens);
-        }
+        TokenDto tokens = jwtService.createToken(account.getUser());
+        serverResponse.setMessage("로그인에 성공했습니다.");
+        serverResponse.setResult(tokens);
+
         return serverResponse;
     }
 
     public ServerResponse joinUser(AuthRequest authRequest){
-        ServerResponse serverResponse =new ServerResponse();
         Account account =new Account();
         User user=new User();
         user.setNickname(authRequest.getNickname());
@@ -63,31 +56,21 @@ public class AccountService {
         accountRepository.save(account);
         TokenDto tokens=jwtService.createToken(user);
 
-        serverResponse.setCode("0000");
         serverResponse.setMessage("회원가입에 성공했습니다.");
         serverResponse.setResult(tokens);
         return serverResponse;
     }
     public ServerResponse dupUser(String email){
-        ServerResponse serverResponse =new ServerResponse();
-        if(accountRepository.existsByEmail(email)){
-            serverResponse.setCode("0001");
-            serverResponse.setMessage("이메일이 중복되었습니다.");
-            serverResponse.setResult(null);
-        }
-        else{
-            serverResponse.setCode("0000");
-            serverResponse.setMessage("가입 가능한 메일입니다.");
-            serverResponse.setResult(null);
-        }
+        if(accountRepository.existsByEmail(email))
+            throw new DuplicateEmailException("이메일이 중복되었습니다.");
+        serverResponse.setMessage("가입 가능한 메일입니다.");
         return serverResponse;
     }
-    public void outUser(AuthRequest authRequest){
-        Account user=accountRepository.findByEmail(authRequest.getEmail());
-        if(!passwordEncoder.matches(authRequest.getPwd(),user.getPassword())){
-            throw new IncorrectException("패스워드가 불일치합니다.");
-        }
+    public ServerResponse outUser(String email){
+        Account user=accountRepository.findByEmail(email);
         user.setUsed(0);
         accountRepository.save(user);
+        serverResponse.setMessage("회워탈퇴에 성공했습니다.");
+        return serverResponse;
     }
 }
