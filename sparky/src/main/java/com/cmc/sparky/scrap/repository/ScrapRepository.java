@@ -12,7 +12,7 @@ import java.util.List;
 
 @Repository
 public interface ScrapRepository extends JpaRepository<Scrap, Long> {
-    Page<Scrap> findByUser(User user, Pageable pageable);
+    Page<Scrap> findByUserAndUsed(User user, Integer used, Pageable pageable);
     List<Scrap> findAllByTitleLikeAndUserNotOrderByPostDateDesc(String title, User user);
     List<Scrap> findAllByTitleLikeAndUserOrderByPostDateDesc(String title, User user);
 }
