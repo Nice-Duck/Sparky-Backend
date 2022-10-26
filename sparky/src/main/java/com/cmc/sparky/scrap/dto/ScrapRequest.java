@@ -9,6 +9,7 @@ import java.util.List;
 @Setter
 public class ScrapRequest {
     private String title;
+    private String subTitle;
     private String memo;
     private String imgUrl;
     private String scpUrl;
