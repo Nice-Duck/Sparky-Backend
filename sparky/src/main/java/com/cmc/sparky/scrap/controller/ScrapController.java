@@ -3,6 +3,7 @@ package com.cmc.sparky.scrap.controller;
 import com.cmc.sparky.common.dto.ServerResponse;
 import com.cmc.sparky.common.service.JwtService;
 import com.cmc.sparky.scrap.dto.ScrapRequest;
+import com.cmc.sparky.scrap.dto.SearchRequest;
 import com.cmc.sparky.scrap.dto.TagRequest;
 import com.cmc.sparky.scrap.service.ScrapService;
 import com.cmc.sparky.user.service.UserService;
@@ -27,22 +28,37 @@ public class ScrapController {
         Long userId=jwtService.getUserId(token);
         return ResponseEntity.ok().body(scrapService.saveScrap(userService.findUser(userId),scrapRequest));
     }
-
-    @ApiOperation(value="스크랩 불러오기",notes = "<strong>자신의 스크랩을 불러온다.</strong>")
-    @RequestMapping(value="/api/v1/scraps", method = RequestMethod.GET)
-    public ResponseEntity<ServerResponse> scrapLoad(@RequestHeader("Authorization") String token){
+    @ApiOperation(value="스크랩 수정",notes = "<strong>스크랩을 수정한다.</strong>")
+    @RequestMapping(value="/api/v1/scraps", method = RequestMethod.PATCH)
+    public ResponseEntity<ServerResponse> scrapUpdate(@RequestHeader("Authorization") String token,
+                                                    @RequestBody ScrapRequest scrapRequest){
         jwtService.validateToken(token);
-        Long uid=jwtService.getUserId(token);
-        return ResponseEntity.ok().body(scrapService.loadScraps(uid));
+        return ResponseEntity.ok().body(scrapService.updateScrap(scrapRequest));
     }
 
+    @ApiOperation(value="스크랩 불러오기",notes = "<strong>스크랩을 불러온다.</strong>")
+    @RequestMapping(value="/api/v1/scraps", method = RequestMethod.GET)
+    public ResponseEntity<ServerResponse> scrapLoad(@RequestHeader("Authorization") String token,
+                                                    @RequestParam(value = "type",defaultValue = "0") Integer type){
+        jwtService.validateToken(token);
+        Long uid=jwtService.getUserId(token);
+        return ResponseEntity.ok().body(scrapService.loadScraps(uid,type));
+    }
+
+    @ApiOperation(value="스크랩 삭제하기",notes = "<strong>스크랩을 삭제한다.</strong>")
+    @RequestMapping(value="/api/v1/scraps", method = RequestMethod.DELETE)
+    public ResponseEntity<ServerResponse> scrapLoad(@RequestHeader("Authorization") String token,
+                                                    @RequestParam("scrapId") Long scrapId) {
+        jwtService.validateToken(token);
+        return ResponseEntity.ok().body(scrapService.deleteScrap(scrapId));
+    }
 
     @ApiOperation(value="모든 태그 조회",notes = "<strong>자신이 등록한 태그 전부 조회 (최신순)</strong>")
     @RequestMapping(value="/api/v1/tags", method = RequestMethod.GET)
-    public ResponseEntity<ServerResponse> curtagLoad(@RequestHeader("Authorization") String token){
+    public ResponseEntity<ServerResponse> tagSearch(@RequestHeader("Authorization") String token){
         jwtService.validateToken(token);
         Long uid=jwtService.getUserId(token);
-        return ResponseEntity.ok().body(scrapService.loadLastTags(uid));
+        return ResponseEntity.ok().body(scrapService.loadTags(uid));
     }
 
     @ApiOperation(value="태그 저장하기",notes = "<strong>태그가 없는 경우 저장함</strong>")
@@ -50,17 +66,17 @@ public class ScrapController {
     public ResponseEntity<ServerResponse> tagSave(@RequestHeader("Authorization") String token,
                                                   @RequestBody TagRequest tagRequest){
         jwtService.validateToken(token);
-        return ResponseEntity.ok().body(scrapService.saveTag(tagRequest));
+        Long uid=jwtService.getUserId(token);
+        return ResponseEntity.ok().body(scrapService.saveTag(uid,tagRequest));
     }
 
     @ApiOperation(value="스크랩 검색",notes = "<strong>스크랩 검색</strong>")
-    @RequestMapping(value="/api/v1/scraps/search", method = RequestMethod.GET)
+    @RequestMapping(value="/api/v1/scraps/search", method = RequestMethod.POST)
     public ResponseEntity<ServerResponse> scrapsSearch(@RequestHeader("Authorization") String token,
-                                                   @RequestParam(value = "type",defaultValue = "0") Integer type,
-                                                   @RequestParam("title")String title){
+                                                       @RequestBody SearchRequest searchRequest) {
         jwtService.validateToken(token);
         Long uid=jwtService.getUserId(token);
-        return ResponseEntity.ok().body(scrapService.searchScraps(uid,title,type));
+        return ResponseEntity.ok().body(scrapService.searchScraps(uid,searchRequest));
     }
 
 }
