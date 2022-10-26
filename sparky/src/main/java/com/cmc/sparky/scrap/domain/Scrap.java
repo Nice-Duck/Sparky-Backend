@@ -20,9 +20,15 @@ public class Scrap {
     @ManyToOne
     @JoinColumn(name="userId")
     private User user;
+    @Column(length = 1000)
     private String title;
+    @Column(length = 1000)
+    private String subTitle;
+    @Column(length = 1000)
     private String memo;
+    @Column(length = 1000)
     private String imgUrl;
+    @Column(length = 1000)
     private String scpUrl;
     private LocalDateTime postDate;
     private Integer open=1;
