@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import java.util.Collections;
 import java.util.Map;
 
-@ControllerAdvice("com.cmc.sparky.scrap.controller")
+@ControllerAdvice("com.cmc.sparky.scrap")
 public class ScrapExceptionHandler {
     @ExceptionHandler(NoneTagException.class)
     public ResponseEntity<Map<String, String>> NotFoundTagException(Exception e){
