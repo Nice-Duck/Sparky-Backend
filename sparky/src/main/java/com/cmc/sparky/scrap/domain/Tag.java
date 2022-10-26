@@ -19,4 +19,7 @@ public class Tag {
     private Long id;
     private String name;
     private String color;
+    @ManyToOne
+    @JoinColumn(name="userId")
+    private User user;
 }
