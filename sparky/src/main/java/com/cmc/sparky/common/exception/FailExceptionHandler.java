@@ -20,7 +20,7 @@ public class FailExceptionHandler {
                 .body(serverResponse);
     }
     @ExceptionHandler(NotFoundException.class)
-    public ResponseEntity<ServerResponse> notFoundHandle(ConflictException e){
+    public ResponseEntity<ServerResponse> notFoundHandle(NotFoundException e){
         ErrorCode errorCode=e.getErrorCode();
         ServerResponse serverResponse=ServerResponse.of(errorCode);
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
