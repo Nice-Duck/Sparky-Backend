@@ -16,15 +16,15 @@ public class RedisConfig {
     private int port;
     @Value("${spring.redis.host}")
     private String host;
-    @Value("${spring.redis.password}")
-    private String password;
+    //@Value("${spring.redis.password}")
+    //private String password;
 
     @Bean
     public RedisConnectionFactory redisConnectionFactory() {
         RedisStandaloneConfiguration redisStandaloneConfiguration = new RedisStandaloneConfiguration();
         redisStandaloneConfiguration.setHostName(host);
         redisStandaloneConfiguration.setPort(port);
-        redisStandaloneConfiguration.setPassword(password);
+        //redisStandaloneConfiguration.setPassword(password);
         LettuceConnectionFactory lettuceConnectionFactory = new LettuceConnectionFactory(redisStandaloneConfiguration);        return lettuceConnectionFactory;
 
     }

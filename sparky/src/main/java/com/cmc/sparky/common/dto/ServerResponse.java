@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 
+@Data
 public class ServerResponse {
     private String code;
     private String message;
