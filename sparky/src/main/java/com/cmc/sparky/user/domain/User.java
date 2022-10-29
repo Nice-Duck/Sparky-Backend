@@ -18,6 +18,7 @@ public class User {
     @GeneratedValue
     @Column(name="userId")
     private Long id;
+    @Column(unique = true)
     private String nickname;
     private String icon="";
 }

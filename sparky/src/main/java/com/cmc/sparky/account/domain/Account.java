@@ -19,6 +19,7 @@ public class Account {
     @OneToOne
     @JoinColumn(name="userId")
     private User user;
+    @Column(unique = true)
     private String email;
     private String password;
     private Integer used=1;
