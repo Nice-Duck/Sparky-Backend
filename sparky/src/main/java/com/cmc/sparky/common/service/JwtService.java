@@ -5,7 +5,8 @@ import com.cmc.sparky.account.repository.AccountRepository;
 import com.cmc.sparky.common.domain.Token;
 import com.cmc.sparky.common.dto.AcTokenResponse;
 import com.cmc.sparky.common.dto.TokenDto;
-import com.cmc.sparky.common.exception.TokenExpiredException;
+import com.cmc.sparky.common.exception.ErrorCode;
+import com.cmc.sparky.common.exception.UnauthorizedException;
 import com.cmc.sparky.common.repository.TokenRepository;
 import com.cmc.sparky.user.domain.User;
 import com.cmc.sparky.user.repository.UserRepository;
@@ -14,7 +15,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.lang.reflect.Member;
 import java.time.Duration;
 import java.util.Date;
 import java.util.HashMap;
@@ -77,7 +77,7 @@ public class JwtService {
         try {
             Jwts.parser().setSigningKey(ac_secret_key).parseClaimsJws(token);
         } catch (ExpiredJwtException e){
-            throw new TokenExpiredException("Token has expired");
+            throw new UnauthorizedException(ErrorCode.EXPIRE_TOKEN);
         }
     }
 
@@ -88,7 +88,7 @@ public class JwtService {
                 .get("Email").toString();
         Token temp=tokenRepository.findById(email).orElse(null);
         if(temp.getRefreshToken()==null){
-            throw new TokenExpiredException("Token has expired");
+            throw new UnauthorizedException(ErrorCode.EXPIRE_TOKEN);
         }
         /*
         if(!temp.getRefreshToken().equals(token)){

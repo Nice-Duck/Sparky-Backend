@@ -3,13 +3,12 @@ package com.cmc.sparky.account.service;
 import com.cmc.sparky.account.domain.Account;
 import com.cmc.sparky.account.dto.AuthRequest;
 import com.cmc.sparky.account.dto.LoginRequest;
-import com.cmc.sparky.account.exception.DuplicateEmailException;
-import com.cmc.sparky.account.exception.EmailException;
-import com.cmc.sparky.account.exception.PasswordException;
-import com.cmc.sparky.account.exception.WithdrawException;
 import com.cmc.sparky.account.repository.AccountRepository;
 import com.cmc.sparky.common.dto.ServerResponse;
 import com.cmc.sparky.common.dto.TokenDto;
+import com.cmc.sparky.common.exception.ConflictException;
+import com.cmc.sparky.common.exception.ErrorCode;
+import com.cmc.sparky.common.exception.NotFoundException;
 import com.cmc.sparky.common.service.JwtService;
 import com.cmc.sparky.user.domain.User;
 import com.cmc.sparky.user.repository.UserRepository;
@@ -27,21 +26,17 @@ public class AccountService {
     private ServerResponse serverResponse =new ServerResponse();
     public ServerResponse checkUser(LoginRequest loginRequest){
         Account account=accountRepository.findByEmail(loginRequest.getEmail());
-
         if(!accountRepository.existsByEmail(loginRequest.getEmail()) ){
-            throw new EmailException("없는 이메일입니다.");
+            throw new ConflictException(ErrorCode.INVALID_EMAIL);
         }
         if(!passwordEncoder.matches(loginRequest.getPwd(),account.getPassword())){
-            throw new PasswordException("비밀번호가 일치하지 않습니다.");
+            throw new ConflictException(ErrorCode.INVALID_PASSWORD);
         }
         if(account.getUsed()==0){
-            throw new WithdrawException("회원 탈퇴한 이메일입니다.");
+            throw new NotFoundException(ErrorCode.INVALID_USER);
         }
         TokenDto tokens = jwtService.createToken(account.getUser());
-        serverResponse.setMessage("로그인에 성공했습니다.");
-        serverResponse.setResult(tokens);
-
-        return serverResponse;
+        return serverResponse.success("로그인에 성공했습니다.",tokens);
     }
 
     public ServerResponse joinUser(AuthRequest authRequest){
@@ -56,23 +51,17 @@ public class AccountService {
         accountRepository.save(account);
         TokenDto tokens=jwtService.createToken(user);
 
-        serverResponse.setMessage("회원가입에 성공했습니다.");
-        serverResponse.setResult(tokens);
-        return serverResponse;
+        return serverResponse.success("회원가입에 성공했습니다.",tokens);
     }
     public ServerResponse dupUser(String email){
         if(accountRepository.existsByEmail(email))
-            throw new DuplicateEmailException("이메일이 중복되었습니다.");
-        serverResponse.setMessage("가입 가능한 메일입니다.");
-        serverResponse.setResult(null);
-        return serverResponse;
+            throw new ConflictException(ErrorCode.DUPLICATE_EMAIL);
+        return serverResponse.success("가입 가능한 메일입니다.");
     }
     public ServerResponse outUser(String email){
         Account user=accountRepository.findByEmail(email);
         user.setUsed(0);
         accountRepository.save(user);
-        serverResponse.setMessage("회워탈퇴에 성공했습니다.");
-        serverResponse.setResult(null);
-        return serverResponse;
+        return serverResponse.success("회원탈퇴에 성공했습니다.");
     }
 }
