@@ -5,7 +5,7 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
-@Data
+
 public class ServerResponse {
     private String code;
     private String message;
@@ -21,6 +21,11 @@ public class ServerResponse {
     public ServerResponse success(String message, Object result){
         this.message=message;
         this.result=result;
+        return this;
+    }
+    public ServerResponse success(String message){
+        this.message=message;
+        this.result=null;
         return this;
     }
     public static ServerResponse of(ErrorCode code) {
