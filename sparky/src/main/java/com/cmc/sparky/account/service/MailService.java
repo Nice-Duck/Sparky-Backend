@@ -5,6 +5,8 @@ import com.cmc.sparky.account.dto.MailCheckRequest;
 import com.cmc.sparky.account.dto.MailSendRequest;
 import com.cmc.sparky.account.repository.MailRepository;
 import com.cmc.sparky.common.dto.ServerResponse;
+import com.cmc.sparky.common.exception.ConflictException;
+import com.cmc.sparky.common.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -45,29 +47,17 @@ public class MailService {
         }catch(Exception e){
             e.printStackTrace();
         }
-        serverResponse.setCode("0000");
-        serverResponse.setMessage("인증 번호를 전송했습니다.");
-        serverResponse.setResult(null);
-        return serverResponse;
+        return serverResponse.success("인증 번호를 전송했습니다.");
     }
     public ServerResponse checkMail(MailCheckRequest mailCheckRequest){
         ServerResponse serverResponse =new ServerResponse();
         Mail mailNumber=mailRepository.findById(mailCheckRequest.getEmail()).orElse(null);
         if(mailNumber==null){
-            serverResponse.setCode("0003");
-            serverResponse.setMessage("인증 시간이 초과되었습니다.");
-            serverResponse.setResult(null);
+            throw new ConflictException(ErrorCode.EXPIRE_NUMBER);
         }
-        else if(!mailNumber.getNumber().equals(mailCheckRequest.getNumber())){
-            serverResponse.setCode("0004");
-            serverResponse.setMessage("메일 인증 번호가 일치하지 않습니다.");
-            serverResponse.setResult(null);
+        if(!mailNumber.getNumber().equals(mailCheckRequest.getNumber())){
+            throw new ConflictException(ErrorCode.INVALID_NUMBER);
         }
-        else {
-            serverResponse.setCode("0000");
-            serverResponse.setMessage("메일 인증에 성공했습니다.");
-            serverResponse.setResult(null);
-        }
-        return serverResponse;
+        return serverResponse.success("메일 인증에 성공했습니다.");
     }
 }
