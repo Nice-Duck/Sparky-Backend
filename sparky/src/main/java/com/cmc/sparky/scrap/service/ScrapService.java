@@ -1,11 +1,12 @@
 package com.cmc.sparky.scrap.service;
 
 import com.cmc.sparky.common.dto.ServerResponse;
+import com.cmc.sparky.common.exception.ConflictException;
+import com.cmc.sparky.common.exception.ErrorCode;
 import com.cmc.sparky.scrap.domain.Scrap;
 import com.cmc.sparky.scrap.domain.ScrapMap;
 import com.cmc.sparky.scrap.domain.Tag;
 import com.cmc.sparky.scrap.dto.*;
-import com.cmc.sparky.scrap.exception.DupTagException;
 import com.cmc.sparky.scrap.repository.ScrapMapRepository;
 import com.cmc.sparky.scrap.repository.ScrapRepository;
 import com.cmc.sparky.scrap.repository.TagRepository;
@@ -55,10 +56,7 @@ public class ScrapService {
 
         SaveResponse saveResponse=new SaveResponse();
         saveResponse.setScrapId(scrap.getId());
-        serverResponse.setMessage("스크랩을 저장했습니다.");
-        serverResponse.setResult(saveResponse);
-        serverResponse.setResult(null);
-        return serverResponse;
+        return serverResponse.success("스크랩을 저장했습니다.",saveResponse);
     }
     //수정필요
     public ServerResponse updateScrap(ScrapRequest scrapRequest){
@@ -73,32 +71,26 @@ public class ScrapService {
 
         SaveResponse saveResponse=new SaveResponse();
         saveResponse.setScrapId(scrap.getId());
-        serverResponse.setMessage("스크랩을 수정했습니다.");
-        serverResponse.setResult(null);
-        return serverResponse;
+        return serverResponse.success("스크랩을 수정했습니다.");
     }
     public ServerResponse deleteScrap(Long scrapId){
         Scrap scrap=scrapRepository.findById(scrapId).orElse(null);
         scrap.setUsed(0);
         scrapRepository.save(scrap);
-        serverResponse.setMessage("스크랩을 삭제했습니다.");
-        serverResponse.setResult(null);
-        return serverResponse;
+        return serverResponse.success("스크랩을 삭제했습니다.");
     }
     public ServerResponse saveTag(Long uid,TagRequest tagRequest){
         Tag tag = new Tag();
         User user=userRepository.findById(uid).orElse(null);
         if(tagRepository.findByNameAndUser(tagRequest.getTag(),user)!=null){
-            throw new DupTagException("이미 존재하는 태그입니다.");
+            throw new ConflictException(ErrorCode.DUPLICATE_TAG);
         }
         tag.setName(tagRequest.getTag());
         tag.setColor(tagRequest.getColor());
         tag.setUser(user);
         tagRepository.save(tag);
-        serverResponse.setCode("0000");
-        serverResponse.setMessage("태그를 성공적으로 추가했습니다.");
-        serverResponse.setResult(new TagResponse(tag.getId(),tag.getName(),tag.getColor()));
-        return serverResponse;
+        TagResponse tagResponse=new TagResponse(tag.getId(),tag.getName(),tag.getColor());
+        return serverResponse.success("태그를 성공적으로 추가했습니다.",tagResponse);
     }
     public ServerResponse loadTags(Long uid){
         User user=userRepository.findById(uid).orElse(null);
@@ -107,10 +99,8 @@ public class ScrapService {
         for (Tag tag: tags){
             tagsResponses.add(new TagResponse(tag.getId(),tag.getName(),tag.getColor()));
         }
-        serverResponse.setCode("0000");
-        serverResponse.setMessage("최근 사용한 태그 목록을 출력합니다.");
-        serverResponse.setResult(new TagsResponse(tagsResponses));
-        return serverResponse;
+        TagsResponse tagsResponse=new TagsResponse(tagsResponses);
+        return serverResponse.success("최근 사용한 태그 목록을 출력합니다.", tagsResponse);
     }
     public List<ScrapResponse> findScrap(Long uid, Integer size, Long other){
         User user=userRepository.findById(uid).orElse(null);
@@ -146,10 +136,7 @@ public class ScrapService {
             homeResponse.setMyScraps(findScrap(uid, 5,0L));
             homeResponse.setRecScraps(findScrap(1L,5,uid));
         }
-        serverResponse.setCode("0000");
-        serverResponse.setMessage("스크랩 로드에 성공했습니다.");
-        serverResponse.setResult(homeResponse);
-        return serverResponse;
+        return serverResponse.success("[홈] 스크랩을 불러옵니다.",homeResponse);
     }
 
     public ServerResponse searchScraps(Long uid,SearchRequest searchRequest){
@@ -183,10 +170,7 @@ public class ScrapService {
                         scrap.getImgUrl(), scrap.getScpUrl(), tagResponses));
             }
         }
-        serverResponse.setCode("0000");
-        serverResponse.setMessage("검색에 성공했습니다.");
-        serverResponse.setResult(scrapResponses);
-        return serverResponse;
+        return serverResponse.success("검색에 성공했습니다.",scrapResponses);
     }
 
 
