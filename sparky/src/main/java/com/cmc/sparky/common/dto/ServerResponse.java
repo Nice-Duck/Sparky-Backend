@@ -7,19 +7,19 @@ import lombok.Setter;
 
 
 @Data
-public class ServerResponse {
+public class ServerResponse<T> {
     private String code;
     private String message;
-    private Object result;
+    private T result;
     public ServerResponse() {
         this.code = "0000";
     }
-    public ServerResponse(ErrorCode code, Object result) {
+    public ServerResponse(ErrorCode code, T result) {
         this.message = code.getMessage();
         this.code = code.getCode();
         this.result = result;
     }
-    public ServerResponse success(String message, Object result){
+    public ServerResponse success(String message, T result){
         this.message=message;
         this.result=result;
         return this;
