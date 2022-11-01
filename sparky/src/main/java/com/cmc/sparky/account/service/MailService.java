@@ -21,10 +21,10 @@ import java.util.Random;
 public class MailService {
     private final JavaMailSender mailSender;
     private final MailRepository mailRepository;
+    private ServerResponse serverResponse =new ServerResponse();
     @Value("${spring.mail.username}")
     private String email;
     public ServerResponse sendMail(MailSendRequest mailSendRequest){
-        ServerResponse serverResponse =new ServerResponse();
         MimeMessage message=mailSender.createMimeMessage();
         String toAddress=mailSendRequest.getEmail();
         try {
@@ -50,7 +50,6 @@ public class MailService {
         return serverResponse.success("인증 번호를 전송했습니다.");
     }
     public ServerResponse checkMail(MailCheckRequest mailCheckRequest){
-        ServerResponse serverResponse =new ServerResponse();
         Mail mailNumber=mailRepository.findById(mailCheckRequest.getEmail()).orElse(null);
         if(mailNumber==null){
             throw new ConflictException(ErrorCode.EXPIRE_NUMBER);
