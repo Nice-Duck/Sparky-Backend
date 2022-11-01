@@ -1,6 +1,7 @@
 package com.cmc.sparky.common.controller;
 
 import com.cmc.sparky.common.dto.AcTokenResponse;
+import com.cmc.sparky.common.dto.ServerResponse;
 import com.cmc.sparky.common.service.JwtService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -18,11 +19,7 @@ public class JwtController {
     private final JwtService jwtService;
     @ApiOperation(value="Access Token 새로 발급",notes = "<strong>refresh 토큰이 유효하다면 access 새로 발급</strong>")
     @RequestMapping(value="/api/v1/accounts/token", method = RequestMethod.POST)
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 404, message = "토큰이 만료되었습니다.")
-    })
-    public ResponseEntity<AcTokenResponse> createAccessToken(@RequestHeader("Authorization") String token){
-        return ResponseEntity.ok().body(jwtService.refreshCompare(token));
+    public ResponseEntity<ServerResponse<AcTokenResponse>> createAccessToken(@RequestHeader("Authorization") String token){
+        return ResponseEntity.ok().body(jwtService.reissueAcToken(token));
     }
 }
