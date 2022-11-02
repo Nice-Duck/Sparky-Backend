@@ -17,8 +17,9 @@ public class Tag {
     @GeneratedValue
     @Column(name="tagId")
     private Long id;
+    @Column(nullable = false)
     private String name;
-    private String color;
+    private String color="#ffffff";
     @ManyToOne
     @JoinColumn(name="userId")
     private User user;
