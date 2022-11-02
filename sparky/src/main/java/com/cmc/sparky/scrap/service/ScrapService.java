@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -41,6 +42,12 @@ public class ScrapService {
             scrapMapRepository.save(scrapMap);
         }
     }
+    public void deleteMapping(Scrap scrap){
+        List<ScrapMap> scrapMaps=scrapMapRepository.findAllByScrap(scrap);
+        for(ScrapMap scrapMap : scrapMaps){
+            scrapMapRepository.delete(scrapMap);
+        }
+    }
 
     public ServerResponse saveScrap(User user, ScrapRequest scrapRequest){
         Scrap scrap=new Scrap();
@@ -52,23 +59,23 @@ public class ScrapService {
         scrap.setScpUrl(scrapRequest.getScpUrl());
         scrap.setPostDate(LocalDateTime.now());
         scrapRepository.save(scrap);
-        saveMapping(scrap,scrapRequest.getTags());
-
+        if(scrapRequest.getTags()!=null) saveMapping(scrap,scrapRequest.getTags());
         SaveResponse saveResponse=new SaveResponse();
         saveResponse.setScrapId(scrap.getId());
         return serverResponse.success("스크랩을 저장했습니다.",saveResponse);
     }
     //수정필요
-    public ServerResponse updateScrap(ScrapRequest scrapRequest){
-        Scrap scrap= new Scrap();
+    public ServerResponse updateScrap(Long scrapId, ScrapRequest scrapRequest){
+        Scrap scrap= scrapRepository.findById(scrapId).orElse(null);
         scrap.setTitle(scrapRequest.getTitle());
         scrap.setMemo(scrapRequest.getMemo());
         scrap.setImgUrl(scrapRequest.getImgUrl());
         scrap.setScpUrl(scrapRequest.getScpUrl());
         scrap.setPostDate(LocalDateTime.now());
         scrapRepository.save(scrap);
-        saveMapping(scrap,scrapRequest.getTags());
 
+        deleteMapping(scrap);
+        if(scrapRequest.getTags()!=null) saveMapping(scrap,scrapRequest.getTags());
         SaveResponse saveResponse=new SaveResponse();
         saveResponse.setScrapId(scrap.getId());
         return serverResponse.success("스크랩을 수정했습니다.");
@@ -104,20 +111,28 @@ public class ScrapService {
     }
     public List<ScrapResponse> findScrap(Long uid, Integer size, Long other){
         User user=userRepository.findById(uid).orElse(null);
+        User another=null;
         Pageable pageable = PageRequest.of(0,size, Sort.by("postDate").descending());
         Page<Scrap> pages=scrapRepository.findByUserAndUsed(user, 1, pageable);
         List<Scrap> scraps=pages.getContent();
         List<ScrapResponse> scrapResponses=new ArrayList<>();
+        List<String> tagsName=new ArrayList<>();
+        List<Tag> tags=new ArrayList<>();
+
+        if(other!=0L) {
+            another = userRepository.findById(other).orElse(null);
+            tagsName = tagRepository.findNameByUser(another);
+            tags = tagRepository.findAllByUser(another);
+        }
         for (Scrap scrap : scraps){
             List<ScrapMap> scrapMaps= scrapMapRepository.findAllByScrap(scrap);
             List<TagResponse> tagResponses=new ArrayList<>();
             for (ScrapMap scrapMap: scrapMaps){
                 Tag tag=new Tag();
                 if(other!=0L){
-                    User mine=userRepository.findById(other).orElse(null);
-                    Tag myTag=tagRepository.findByNameAndUser(scrapMap.getTag().getName(),mine);
-                    if(myTag==null)tag=scrapMap.getTag();
-                    else tag=myTag;
+                    Integer index=tagsName.indexOf(scrapMap.getTag().getName());
+                    if(index!=-1) tag=tags.get(index);
+                    else tag=scrapMap.getTag();
                 }
                 else{tag=scrapMap.getTag();}
                 tagResponses.add(new TagResponse(tag.getId(),tag.getName(),tag.getColor()));
@@ -125,6 +140,8 @@ public class ScrapService {
             scrapResponses.add(new ScrapResponse(scrap.getId(), scrap.getTitle(),scrap.getSubTitle(),scrap.getMemo(),
                     scrap.getImgUrl(),scrap.getScpUrl(),tagResponses));
         }
+
+
         return scrapResponses;
     }
     public ServerResponse loadScraps(Long uid, Integer type){
@@ -143,8 +160,8 @@ public class ScrapService {
         User user=userRepository.findById(uid).orElse(null);
         String find_title="%"+searchRequest.getTitle()+"%";
         List<Scrap> scraps=new ArrayList<>();
-        if(searchRequest.getType()==0) scraps=scrapRepository.findAllByTitleLikeAndUserNotOrderByPostDateDesc(find_title, user);
-        else scraps=scrapRepository.findAllByTitleLikeAndUserOrderByPostDateDesc(find_title, user);
+        if(searchRequest.getType()==0) scraps=scrapRepository.findAllByTitleLikeAndUserAndUsedNotOrderByPostDateDesc(find_title, user, 1);
+        else scraps=scrapRepository.findAllByTitleLikeAndUserAndUsedOrderByPostDateDesc(find_title, user, 1);
         List<ScrapResponse> scrapResponses=new ArrayList<>();
         for (Scrap scrap : scraps){
             Integer cnt=0;

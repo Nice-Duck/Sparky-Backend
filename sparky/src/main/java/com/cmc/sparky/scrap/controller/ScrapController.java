@@ -31,9 +31,10 @@ public class ScrapController {
     @ApiOperation(value="스크랩 수정",notes = "<strong>스크랩을 수정한다.</strong>")
     @RequestMapping(value="/api/v1/scraps", method = RequestMethod.PATCH)
     public ResponseEntity<ServerResponse<SaveResponse>> scrapUpdate(@RequestHeader("Authorization") String token,
-                                                    @RequestBody ScrapRequest scrapRequest){
+                                                                    @RequestParam("scrapId") Long scrapId
+                                                                    ,@RequestBody ScrapRequest scrapRequest){
         jwtService.validateToken(token);
-        return ResponseEntity.ok().body(scrapService.updateScrap(scrapRequest));
+        return ResponseEntity.ok().body(scrapService.updateScrap(scrapId, scrapRequest));
     }
 
     @ApiOperation(value="스크랩 불러오기",notes = "<strong>스크랩을 불러온다.</strong>")
