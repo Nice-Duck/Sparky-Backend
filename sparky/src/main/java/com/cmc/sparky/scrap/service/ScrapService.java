@@ -76,8 +76,6 @@ public class ScrapService {
 
         deleteMapping(scrap);
         if(scrapRequest.getTags()!=null) saveMapping(scrap,scrapRequest.getTags());
-        SaveResponse saveResponse=new SaveResponse();
-        saveResponse.setScrapId(scrap.getId());
         return serverResponse.success("스크랩을 수정했습니다.");
     }
     public ServerResponse deleteScrap(Long scrapId){
