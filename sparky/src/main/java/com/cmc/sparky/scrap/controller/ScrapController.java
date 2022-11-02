@@ -65,7 +65,7 @@ public class ScrapController {
         return ResponseEntity.ok().body(scrapService.searchScraps(uid,searchRequest));
     }
     @ApiOperation(value="스크랩 url 유효성",notes = "<strong>스크랩 유효한지</strong>")
-    @GetMapping("/validate")
+    @GetMapping("/validation")
     public ResponseEntity<ServerResponse<Void>> scrapsValidate(@RequestHeader("Authorization") String token,
                                                         @RequestParam("url")String url) {
         jwtService.validateToken(token);
