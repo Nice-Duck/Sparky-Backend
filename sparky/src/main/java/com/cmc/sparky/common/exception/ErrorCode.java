@@ -12,6 +12,7 @@ public enum ErrorCode {
     // default HTTP Status : 404 (Not Found)
     INVALID_USER("F000", "회원 탈퇴한 이메일입니다."), //탈퇴 후 6개월 뒤 다시 회원가입 가능
     INVALID_TAG("F001", "태그가 존재하지 않습니다."),
+    INVALID_URL("F002", "URL이 존재하지 않습니다."),
 
     // default HTTP Status : 409 (Conflict)
     DUPLICATE_EMAIL("C001", "이메일이 중복되었습니다."),

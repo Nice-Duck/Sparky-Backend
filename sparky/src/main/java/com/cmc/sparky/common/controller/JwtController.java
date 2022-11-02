@@ -9,16 +9,18 @@ import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 @Controller
 @RequiredArgsConstructor
+@RequestMapping("/api/v1/token")
 public class JwtController {
     private final JwtService jwtService;
     @ApiOperation(value="Access Token 새로 발급",notes = "<strong>refresh 토큰이 유효하다면 access 새로 발급</strong>")
-    @RequestMapping(value="/api/v1/accounts/token", method = RequestMethod.POST)
+    @PostMapping("")
     public ResponseEntity<ServerResponse<AcTokenResponse>> createAccessToken(@RequestHeader("Authorization") String token){
         return ResponseEntity.ok().body(jwtService.reissueAcToken(token));
     }

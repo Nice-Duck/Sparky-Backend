@@ -17,39 +17,39 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/api/v1/accounts")
 public class AccountController {
     private final AccountService accountService;
     private final MailService mailService;
     private final JwtService jwtService;
     @ApiOperation(value="중복확인",notes = "<strong>이메일 중복을 확인한다.</strong>")
-    @RequestMapping(value="/api/v1/accounts/register", method = RequestMethod.GET)
+    @GetMapping("/register")
     public ResponseEntity<ServerResponse<Void>> duplicationUser(@RequestParam("email") String email){
         return ResponseEntity.ok().body(accountService.dupUser(email));
     }
     @ApiOperation(value="인증 메일 전송",notes = "<strong>인증메일전송</strong>")
-    @RequestMapping(value="/api/v1/accounts/mails/send", method = RequestMethod.POST)
+    @PostMapping("/mails/send")
     public ResponseEntity<ServerResponse<Void>> checkUser(@RequestBody MailSendRequest mailSendRequest) {
         return ResponseEntity.ok().body(mailService.sendMail(mailSendRequest));
     }
     @ApiOperation(value="인증 메일 확인",notes = "<strong>인증메일확인</strong>")
-    @RequestMapping(value="/api/v1/accounts/mails/confirm", method = RequestMethod.POST)
+    @PostMapping("/mails/confirm")
     public ResponseEntity<ServerResponse<Void>> confirmUser(@RequestBody MailCheckRequest mailCheckRequest){
         return ResponseEntity.ok().body(mailService.checkMail(mailCheckRequest));
     }
     @ApiOperation(value="회원가입",notes = "<strong>이메일과 패스워드를 입력받아 회원 가입을 진행한다.</strong>")
-    @RequestMapping(value="/api/v1/accounts/register", method = RequestMethod.POST)
+    @PostMapping("/register")
     public ResponseEntity<ServerResponse<TokenDto>> joinUser(@RequestBody AuthRequest authRequest){
         return ResponseEntity.ok().body(accountService.joinUser(authRequest));
     }
-
     @ApiOperation(value="로그인",notes = "<strong>이메일과 패스워드를 입력받아 성공 여부를 알린다.</strong>")
-    @RequestMapping(value="/api/v1/accounts", method = RequestMethod.POST)
+    @PostMapping("")
     public ResponseEntity<ServerResponse<TokenDto>> loginUser(@RequestBody LoginRequest loginRequest){
         return ResponseEntity.ok().body(accountService.checkUser(loginRequest));
     }
 
     @ApiOperation(value="회원탈퇴",notes = "<strong>회원 탈퇴</strong>")
-    @RequestMapping(value="/api/v1/accounts", method = RequestMethod.DELETE)
+    @DeleteMapping("")
     public ResponseEntity<ServerResponse<Void>> deleteUser(@RequestHeader("Authorization") String token){
         jwtService.validateToken(token);
         String email=jwtService.getUser(token);
