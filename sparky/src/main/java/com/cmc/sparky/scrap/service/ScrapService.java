@@ -3,6 +3,7 @@ package com.cmc.sparky.scrap.service;
 import com.cmc.sparky.common.dto.ServerResponse;
 import com.cmc.sparky.common.exception.ConflictException;
 import com.cmc.sparky.common.exception.ErrorCode;
+import com.cmc.sparky.common.exception.NotFoundException;
 import com.cmc.sparky.scrap.domain.Scrap;
 import com.cmc.sparky.scrap.domain.ScrapMap;
 import com.cmc.sparky.scrap.domain.Tag;
@@ -33,12 +34,21 @@ public class ScrapService {
     private final UserRepository userRepository;
     private ServerResponse serverResponse =new ServerResponse();
     public void saveMapping(Scrap scrap, List<Long> tags){
+        List<ScrapMap> scrapMaps=new ArrayList<>();
         for(Long tag:tags){
+            System.out.println(tag);
             ScrapMap scrapMap=new ScrapMap();
             scrapMap.setUser(scrap.getUser()); // 여러번 찾기 귀찮아서 일단 유저를 매핑
             scrapMap.setScrap(scrap);
-            scrapMap.setTag(tagRepository.findById(tag).orElse(null));
+            Tag tag_entity=tagRepository.findById(tag).orElse(null);
+            if(tag_entity==null){
+                throw new NotFoundException(ErrorCode.INVALID_TAG);
+            }
+            scrapMap.setTag(tag_entity);
             scrapMap.setPostDate(LocalDateTime.now());
+            scrapMaps.add(scrapMap);
+        }
+        for(ScrapMap scrapMap: scrapMaps){
             scrapMapRepository.save(scrapMap);
         }
     }
