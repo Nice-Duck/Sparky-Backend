@@ -20,6 +20,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLConnection;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -33,6 +36,18 @@ public class ScrapService {
     private final ScrapMapRepository scrapMapRepository;
     private final UserRepository userRepository;
     private ServerResponse serverResponse =new ServerResponse();
+    public ServerResponse urlValidator(String url){
+        try {
+            URL urlCheck = new URL(url);
+            URLConnection connection=urlCheck.openConnection();
+            HttpURLConnection exitCode = (HttpURLConnection)connection;
+            System.out.println(exitCode.getResponseCode());
+            return serverResponse.success("존재하는 URL 입니다.");
+        }catch(Exception e){
+            throw new NotFoundException(ErrorCode.INVALID_URL);
+        }
+
+    }
     public void saveMapping(Scrap scrap, List<Long> tags){
         List<ScrapMap> scrapMaps=new ArrayList<>();
         for(Long tag:tags){
