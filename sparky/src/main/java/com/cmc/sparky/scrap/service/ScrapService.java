@@ -132,7 +132,7 @@ public class ScrapService {
         TagsResponse tagsResponse=new TagsResponse(tagsResponses);
         return serverResponse.success("최근 사용한 태그 목록을 출력합니다.", tagsResponse);
     }
-    public List<ScrapResponse> findScrap(Long uid, Integer size, Long other){
+    public List<ScrapResponse> findScrap(Long uid, Integer size, Long other, Integer type){
         User user=userRepository.findById(uid).orElse(null);
         User another=null;
         Pageable pageable = PageRequest.of(0,size, Sort.by("postDate").descending());
@@ -160,7 +160,7 @@ public class ScrapService {
                 else{tag=scrapMap.getTag();}
                 tagResponses.add(new TagResponse(tag.getId(),tag.getName(),tag.getColor()));
             }
-            scrapResponses.add(new ScrapResponse(scrap.getId(), scrap.getTitle(),scrap.getSubTitle(),scrap.getMemo(),
+            scrapResponses.add(new ScrapResponse(type, scrap.getId(), scrap.getTitle(),scrap.getSubTitle(),scrap.getMemo(),
                     scrap.getImgUrl(),scrap.getScpUrl(),tagResponses));
         }
 
@@ -170,11 +170,11 @@ public class ScrapService {
     public ServerResponse loadScraps(Long uid, Integer type){
         HomeResponse homeResponse=new HomeResponse();
         if(type==1){
-            homeResponse.setMyScraps(findScrap(uid,100,0L));
+            homeResponse.setMyScraps(findScrap(uid,100,0L, 1));
         }
         else {
-            homeResponse.setMyScraps(findScrap(uid, 5,0L));
-            homeResponse.setRecScraps(findScrap(1L,5,uid));
+            homeResponse.setMyScraps(findScrap(uid, 5,0L,1));
+            homeResponse.setRecScraps(findScrap(1L,5,uid,2));
         }
         return serverResponse.success("[홈] 스크랩을 불러옵니다.",homeResponse);
     }
@@ -206,7 +206,7 @@ public class ScrapService {
                 tagResponses.add(new TagResponse(tag.getId(),tag.getName(),tag.getColor()));
             }
             if(cnt==searchRequest.getTags().size() || searchRequest.getType()==0) {
-                scrapResponses.add(new ScrapResponse(scrap.getId(), scrap.getTitle(), scrap.getSubTitle(), scrap.getMemo(),
+                scrapResponses.add(new ScrapResponse(searchRequest.getType()+1,scrap.getId(), scrap.getTitle(), scrap.getSubTitle(), scrap.getMemo(),
                         scrap.getImgUrl(), scrap.getScpUrl(), tagResponses));
             }
         }

@@ -7,6 +7,7 @@ import java.util.List;
 
 @Getter
 public class ScrapResponse {
+    private Integer type;
     private Long scrapId;
     private String title;
     private String subTitle;
@@ -15,8 +16,9 @@ public class ScrapResponse {
     private String imgUrl;
     private String scpUrl;
     private List<TagResponse> tagsResponse;
-    public ScrapResponse(Long scrapId, String title, String subTitle, String memo, String imgUrl, String scpUrl,
+    public ScrapResponse(Integer type, Long scrapId, String title, String subTitle, String memo, String imgUrl, String scpUrl,
                          List<TagResponse> tagsResponse){
+        this.type=type;
         this.scrapId=scrapId;
         this.subTitle=subTitle;
         this.title=title;
