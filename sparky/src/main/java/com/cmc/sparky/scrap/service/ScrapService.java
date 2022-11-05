@@ -174,7 +174,7 @@ public class ScrapService {
         }
         else {
             homeResponse.setMyScraps(findScrap(uid, 5,0L,1));
-            homeResponse.setRecScraps(findScrap(1L,5,uid,2));
+            homeResponse.setRecScraps(findScrap(1L,5,uid,0));
         }
         return serverResponse.success("[홈] 스크랩을 불러옵니다.",homeResponse);
     }
@@ -206,7 +206,7 @@ public class ScrapService {
                 tagResponses.add(new TagResponse(tag.getId(),tag.getName(),tag.getColor()));
             }
             if(cnt==searchRequest.getTags().size() || searchRequest.getType()==0) {
-                scrapResponses.add(new ScrapResponse(searchRequest.getType()+1,scrap.getId(), scrap.getTitle(), scrap.getSubTitle(), scrap.getMemo(),
+                scrapResponses.add(new ScrapResponse(searchRequest.getType(),scrap.getId(), scrap.getTitle(), scrap.getSubTitle(), scrap.getMemo(),
                         scrap.getImgUrl(), scrap.getScpUrl(), tagResponses));
             }
         }
