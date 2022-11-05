@@ -183,7 +183,7 @@ public class ScrapService {
         User user=userRepository.findById(uid).orElse(null);
         String find_title="%"+searchRequest.getTitle()+"%";
         List<Scrap> scraps=new ArrayList<>();
-        if(searchRequest.getType()==0) scraps=scrapRepository.findAllByTitleLikeAndUserAndUsedNotOrderByPostDateDesc(find_title, user, 1);
+        if(searchRequest.getType()==0) scraps=scrapRepository.findAllByTitleLikeAndUserNotAndUsedOrderByPostDateDesc(find_title, user, 1);
         else scraps=scrapRepository.findAllByTitleLikeAndUserAndUsedOrderByPostDateDesc(find_title, user, 1);
         List<ScrapResponse> scrapResponses=new ArrayList<>();
         for (Scrap scrap : scraps){
