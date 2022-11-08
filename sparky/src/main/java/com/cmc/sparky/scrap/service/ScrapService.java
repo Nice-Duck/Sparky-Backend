@@ -89,10 +89,10 @@ public class ScrapService {
         saveResponse.setScrapId(scrap.getId());
         return serverResponse.success("스크랩을 저장했습니다.",saveResponse);
     }
-    //수정필요
     public ServerResponse updateScrap(Long scrapId, ScrapRequest scrapRequest){
         Scrap scrap= scrapRepository.findById(scrapId).orElse(null);
         scrap.setTitle(scrapRequest.getTitle());
+        scrap.setSubTitle(scrapRequest.getSubTitle());
         scrap.setMemo(scrapRequest.getMemo());
         scrap.setImgUrl(scrapRequest.getImgUrl());
         scrap.setScpUrl(scrapRequest.getScpUrl());
