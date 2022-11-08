@@ -39,7 +39,7 @@ public class AccountService {
         return serverResponse.success("로그인에 성공했습니다.",tokens);
     }
 
-    public ServerResponse joinUser(AuthRequest authRequest){
+    public ServerResponse joinUser(AuthRequest authRequest) {
         Account account =new Account();
         User user=new User();
         user.setNickname(authRequest.getNickname());

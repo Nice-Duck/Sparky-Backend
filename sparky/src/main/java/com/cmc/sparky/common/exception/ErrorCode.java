@@ -24,7 +24,7 @@ public enum ErrorCode {
     DUPLICATE_TAG("C007", "이미 존재하는 태그입니다."),
 
     // HTTP Status : 500 (SERVER ERROR)
-    NULL_DATABASE("S000", "return NULL"),
+    INTERNAL_ERROR("S000", "SERVER 통신에 실패했습니다."),
     INVALID_JJWT("S001", "JJWT SERVER ERROR");
     private String code;
     private String message;

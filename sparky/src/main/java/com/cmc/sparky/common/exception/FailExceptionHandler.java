@@ -33,4 +33,11 @@ public class FailExceptionHandler {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                 .body(serverResponse);
     }
+    @ExceptionHandler(ServerException.class)
+    public ResponseEntity<ServerResponse> serverHandle(UnauthorizedException e){
+        ErrorCode errorCode=e.getErrorCode();
+        ServerResponse serverResponse=ServerResponse.of(errorCode);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(serverResponse);
+    }
 }

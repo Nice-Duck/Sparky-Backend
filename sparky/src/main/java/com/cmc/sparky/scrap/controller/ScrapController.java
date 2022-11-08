@@ -17,7 +17,6 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/scraps")
 public class ScrapController {
-
     private final ScrapService scrapService;
     private final JwtService jwtService;
     private final UserService userService;
@@ -33,9 +32,9 @@ public class ScrapController {
     @PatchMapping("")
     public ResponseEntity<ServerResponse<Void>> scrapUpdate(@RequestHeader("Authorization") String token,
                                                                     @RequestParam("scrapId") Long scrapId
-                                                                    ,@RequestBody ScrapRequest scrapRequest){
+                                                                    ,@ModelAttribute UpdateRequest updateRequest) throws Exception {
         jwtService.validateToken(token);
-        return ResponseEntity.ok().body(scrapService.updateScrap(scrapId, scrapRequest));
+        return ResponseEntity.ok().body(scrapService.updateScrap(scrapId, updateRequest));
     }
 
     @ApiOperation(value="스크랩 불러오기",notes = "<strong>스크랩을 불러온다.</strong>")
@@ -71,5 +70,11 @@ public class ScrapController {
         jwtService.validateToken(token);
         return ResponseEntity.ok().body(scrapService.urlValidator(url));
     }
-
+    @ApiOperation(value="스크랩 신고",notes = "<strong>부적절한 스크랩 신고</strong>")
+    @GetMapping("/declaration")
+    public ResponseEntity<ServerResponse<Void>> scrapsDeclaration(@RequestHeader("Authorization") String token,
+                                                                  @RequestParam("scrapId") Long scrapId) {
+        jwtService.validateToken(token);
+        return ResponseEntity.ok().body(scrapService.declareScraps(scrapId));
+    }
 }
