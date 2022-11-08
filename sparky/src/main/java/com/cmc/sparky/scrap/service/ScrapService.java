@@ -1,5 +1,9 @@
 package com.cmc.sparky.scrap.service;
 
+import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.model.CannedAccessControlList;
+import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.cmc.sparky.common.dto.ServerResponse;
 import com.cmc.sparky.common.exception.ConflictException;
 import com.cmc.sparky.common.exception.ErrorCode;
@@ -19,7 +23,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
@@ -31,6 +37,8 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class ScrapService {
+    private String S3Bucket = "sparkyapp"; // Bucket 이름
+    private final AmazonS3Client amazonS3Client;
     private final ScrapRepository scrapRepository;
     private final TagRepository tagRepository;
     private final ScrapMapRepository scrapMapRepository;
@@ -89,18 +97,33 @@ public class ScrapService {
         saveResponse.setScrapId(scrap.getId());
         return serverResponse.success("스크랩을 저장했습니다.",saveResponse);
     }
-    public ServerResponse updateScrap(Long scrapId, ScrapRequest scrapRequest){
+    public ServerResponse updateScrap(Long scrapId, UpdateRequest updateRequest) throws Exception {
         Scrap scrap= scrapRepository.findById(scrapId).orElse(null);
-        scrap.setTitle(scrapRequest.getTitle());
-        scrap.setSubTitle(scrapRequest.getSubTitle());
-        scrap.setMemo(scrapRequest.getMemo());
-        scrap.setImgUrl(scrapRequest.getImgUrl());
-        scrap.setScpUrl(scrapRequest.getScpUrl());
+        scrap.setTitle(updateRequest.getTitle());
+        scrap.setSubTitle(updateRequest.getSubTitle());
+        scrap.setMemo(updateRequest.getMemo());
         scrap.setPostDate(LocalDateTime.now());
+
+        if(updateRequest.getImage().getSize()!=0){
+            MultipartFile multipartFile=updateRequest.getImage();
+            String originalName = multipartFile.getOriginalFilename(); // 파일 이름
+            long size = multipartFile.getSize(); // 파일 크기
+            ObjectMetadata objectMetaData = new ObjectMetadata();
+            objectMetaData.setContentType(multipartFile.getContentType());
+            objectMetaData.setContentLength(size);
+            // S3에 업로드
+            amazonS3Client.putObject(
+                    new PutObjectRequest(S3Bucket, originalName, multipartFile.getInputStream(), objectMetaData)
+                            .withCannedAcl(CannedAccessControlList.PublicRead)
+            );
+            String imagePath = amazonS3Client.getUrl(S3Bucket, originalName).toString(); // 접근가능한 URL 가져오기
+            scrap.setImgUrl(imagePath);
+        }
+
         scrapRepository.save(scrap);
 
         deleteMapping(scrap);
-        if(scrapRequest.getTags()!=null) saveMapping(scrap,scrapRequest.getTags());
+        if(updateRequest.getTags()!=null) saveMapping(scrap,updateRequest.getTags());
         return serverResponse.success("스크랩을 수정했습니다.");
     }
     public ServerResponse deleteScrap(Long scrapId){
@@ -211,6 +234,14 @@ public class ScrapService {
             }
         }
         return serverResponse.success("검색에 성공했습니다.",scrapResponses);
+    }
+    public ServerResponse declareScraps(Long scrapId) {
+        Scrap scrap=scrapRepository.findById(scrapId).orElse(null);
+        scrap.setDeclaration(scrap.getDeclaration()+1);
+        scrapRepository.save(scrap);
+        if(scrap.getDeclaration()>=3) deleteScrap(scrapId);
+
+        return serverResponse.success("신고 완료되었습니다.");
     }
 
 
