@@ -75,6 +75,7 @@ public class ScrapController {
     public ResponseEntity<ServerResponse<Void>> scrapsDeclaration(@RequestHeader("Authorization") String token,
                                                                   @RequestParam("scrapId") Long scrapId) {
         jwtService.validateToken(token);
-        return ResponseEntity.ok().body(scrapService.declareScraps(scrapId));
+        Long uid=jwtService.getUserId(token);
+        return ResponseEntity.ok().body(scrapService.declareScraps(uid,scrapId));
     }
 }

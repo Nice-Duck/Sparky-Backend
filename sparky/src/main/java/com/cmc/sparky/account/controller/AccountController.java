@@ -47,6 +47,11 @@ public class AccountController {
     public ResponseEntity<ServerResponse<TokenDto>> loginUser(@RequestBody LoginRequest loginRequest){
         return ResponseEntity.ok().body(accountService.checkUser(loginRequest));
     }
+    @ApiOperation(value="비밀번호 수정",notes = "<strong>이메일과 패스워드를 입력받아 성공 여부를 알린다.</strong>")
+    @PatchMapping("")
+    public ResponseEntity<ServerResponse<Void>> updatePwd(@RequestBody LoginRequest loginRequest){
+        return ResponseEntity.ok().body(accountService.updatePwd(loginRequest));
+    }
 
     @ApiOperation(value="회원탈퇴",notes = "<strong>회원 탈퇴</strong>")
     @DeleteMapping("")
@@ -55,10 +60,5 @@ public class AccountController {
         String email=jwtService.getUser(token);
         return ResponseEntity.ok().body(accountService.outUser(email));
     }
-    /*
-    @ApiOperation(value="비밀번호수정",notes = "<strong>회원수정</strong>")
-    @RequestMapping(value="/api/v1/accounts", method = RequestMethod.PATCH)
-    public ResponseEntity updateUser(@RequestBody AuthRequest authRequest){
-        return ResponseEntity.ok().build();
-    }*/
+
 }

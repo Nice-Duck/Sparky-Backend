@@ -36,14 +36,28 @@ public class MailService {
                 number+=String.valueOf(rd.nextInt(10));
             }
             mailRepository.save(new Mail(toAddress,number));
-            String htmlStr = "<img src='https://sparkyapp.s3.amazonaws.com/Group+7221.png'  height='48' width='48'><br><br>"
-                    +"<span style='color:rgb(0,0,0);font-size:medium'>"
-                    +"안녕하세요, "+id+"님!<br><br>"+
-                    "Sparky에 가입하시려면 앱에 이 인증 번호를 입력해 주세요.<br>다른 사람과 번호를 공유하지 마세요.<br><br></span>"+
-                    "<h1>"+number+"<h1>";
+            String htmlStr="";
+            if(mailSendRequest.getType()==0) {
+                htmlStr = "<img src='https://sparkyapp.s3.amazonaws.com/Group+7221.png'  height='48' width='48'><br><br>"
+                        + "<span style='color:rgb(0,0,0);font-size:medium'>"
+                        + "안녕하세요, " + id + "님!<br><br>" +
+                        "Sparky에 가입하시려면 앱에 이 인증 번호를 입력해 주세요.<br>다른 사람과 번호를 공유하지 마세요.<br><br></span>"
+                        +
+                        "<h1>" + number + "<h1>";
+                messageHelper.setSubject("Sparky ID 인증 번호");
+            }
+            else{
+                htmlStr = "<img src='https://sparkyapp.s3.amazonaws.com/Group+7221.png'  height='48' width='48'><br><br>"
+                    + "<span style='color:rgb(0,0,0);font-size:medium'>"
+                    + "안녕하세요, " + id + "님!<br><br>" +
+                    "비밀번호를 수정하려면 앱에 이 인증 번호를 입력해 주세요.<br>다른 사람과 번호를 공유하지 마세요.<br><br></span>"
+                    +
+                    "<h1>" + number + "<h1>";
+                messageHelper.setSubject("Sparky 비밀번호 찾기");
+            }
             messageHelper.setText(htmlStr, true);
             messageHelper.setTo(toAddress);
-            messageHelper.setSubject("Sparky ID 인증 번호");
+
             messageHelper.setFrom(email,"Sparky");
             mailSender.send(message);
         }catch(Exception e){
