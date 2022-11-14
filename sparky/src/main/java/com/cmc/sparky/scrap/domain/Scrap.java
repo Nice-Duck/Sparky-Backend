@@ -33,5 +33,4 @@ public class Scrap {
     private LocalDateTime postDate;
     private Integer open=1;
     private Integer used=1;
-    private Integer declaration=0;
 }

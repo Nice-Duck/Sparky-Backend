@@ -10,7 +10,7 @@ public enum ErrorCode {
     INVALID_TOKEN("U001", "토큰이 유효하지않습니다."),
 
     // default HTTP Status : 404 (Not Found)
-    INVALID_USER("F000", "회원 탈퇴한 이메일입니다."), //탈퇴 후 6개월 뒤 다시 회원가입 가능
+    INVALID_USER("F000", "회원 탈퇴한 이메일로 6개월 후 가입 가능합니다."), //탈퇴 후 6개월 뒤 다시 회원가입 가능
     INVALID_TAG("F001", "태그가 존재하지 않습니다."),
     INVALID_URL("F002", "URL이 존재하지 않습니다."),
 
@@ -22,6 +22,7 @@ public enum ErrorCode {
     INVALID_EMAIL("C005", "없는 이메일입니다."),
     INVALID_PASSWORD("C006", "비밀번호가 일치하지 않습니다."),
     DUPLICATE_TAG("C007", "이미 존재하는 태그입니다."),
+    DUPLICATE_DECLARE("C008","이미 신고처리 되었습니다."),
 
     // HTTP Status : 500 (SERVER ERROR)
     INTERNAL_ERROR("S000", "SERVER 통신에 실패했습니다."),

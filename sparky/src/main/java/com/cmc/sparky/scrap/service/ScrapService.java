@@ -8,10 +8,12 @@ import com.cmc.sparky.common.dto.ServerResponse;
 import com.cmc.sparky.common.exception.ConflictException;
 import com.cmc.sparky.common.exception.ErrorCode;
 import com.cmc.sparky.common.exception.NotFoundException;
+import com.cmc.sparky.scrap.domain.Declaration;
 import com.cmc.sparky.scrap.domain.Scrap;
 import com.cmc.sparky.scrap.domain.ScrapMap;
 import com.cmc.sparky.scrap.domain.Tag;
 import com.cmc.sparky.scrap.dto.*;
+import com.cmc.sparky.scrap.repository.DeclarationRepository;
 import com.cmc.sparky.scrap.repository.ScrapMapRepository;
 import com.cmc.sparky.scrap.repository.ScrapRepository;
 import com.cmc.sparky.scrap.repository.TagRepository;
@@ -43,6 +45,7 @@ public class ScrapService {
     private final TagRepository tagRepository;
     private final ScrapMapRepository scrapMapRepository;
     private final UserRepository userRepository;
+    private final DeclarationRepository declarationRepository;
     private ServerResponse serverResponse =new ServerResponse();
     public ServerResponse urlValidator(String url){
         try {
@@ -235,12 +238,20 @@ public class ScrapService {
         }
         return serverResponse.success("검색에 성공했습니다.",scrapResponses);
     }
-    public ServerResponse declareScraps(Long scrapId) {
+    public ServerResponse declareScraps(Long uid,Long scrapId) {
         Scrap scrap=scrapRepository.findById(scrapId).orElse(null);
-        scrap.setDeclaration(scrap.getDeclaration()+1);
-        scrapRepository.save(scrap);
-        if(scrap.getDeclaration()>=3) deleteScrap(scrapId);
-
+        User user=userRepository.findById(uid).orElse(null);
+        if(declarationRepository.findByScrapAndUser(scrap,user)!=null)
+            throw new ConflictException(ErrorCode.DUPLICATE_DECLARE);
+        Long cnt= declarationRepository.countByScrap(scrap);
+        System.out.println(cnt);
+        if(cnt>=3){scrap.setUsed(0);}
+        else{
+            Declaration declaration=new Declaration();
+            declaration.setScrap(scrap);
+            declaration.setUser(user);
+            declarationRepository.save(declaration);
+        }
         return serverResponse.success("신고 완료되었습니다.");
     }
 
