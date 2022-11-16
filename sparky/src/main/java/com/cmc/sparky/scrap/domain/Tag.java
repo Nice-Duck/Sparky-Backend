@@ -23,4 +23,5 @@ public class Tag {
     @ManyToOne
     @JoinColumn(name="userId")
     private User user;
+    private Boolean isDeleted=false;
 }
