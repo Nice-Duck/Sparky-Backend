@@ -8,4 +8,5 @@ import org.springframework.web.multipart.MultipartFile;
 @Setter
 public class UserRequest {
     private MultipartFile icon;
+    private String name;
 }

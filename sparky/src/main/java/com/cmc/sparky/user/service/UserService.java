@@ -7,9 +7,12 @@ import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.cmc.sparky.common.dto.ServerResponse;
 import com.cmc.sparky.common.exception.ConflictException;
 import com.cmc.sparky.common.exception.ErrorCode;
+import com.cmc.sparky.user.domain.Inquiry;
 import com.cmc.sparky.user.domain.User;
+import com.cmc.sparky.user.dto.InquiryRequest;
 import com.cmc.sparky.user.dto.UserRequest;
 import com.cmc.sparky.user.dto.UserResponse;
+import com.cmc.sparky.user.repository.InquiryRepository;
 import com.cmc.sparky.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -26,6 +29,7 @@ public class UserService {
 
     private final AmazonS3Client amazonS3Client;
     private final UserRepository userRepository;
+    private final InquiryRepository inquiryRepository;
     private ServerResponse serverResponse=new ServerResponse();
     public ServerResponse dupName(String name){
         if(userRepository.existsByNickname(name)){
@@ -39,6 +43,9 @@ public class UserService {
         return serverResponse.success("사용자 이름과 아이콘 주소를 불러왔습니다.",userResponse);
     }
     public ServerResponse updateUser(Long uid, UserRequest userRequest) throws Exception {
+        if(userRepository.existsByNickname(userRequest.getName())){
+            throw new ConflictException(ErrorCode.DUPLICATE_NICKNAME);
+        }
         MultipartFile multipartFile=userRequest.getIcon();
         String originalName = multipartFile.getOriginalFilename(); // 파일 이름
         long size = multipartFile.getSize(); // 파일 크기
@@ -54,11 +61,22 @@ public class UserService {
         String imagePath = amazonS3Client.getUrl(S3Bucket, originalName).toString(); // 접근가능한 URL 가져오기
         User user=userRepository.findById(uid).orElse(null);
         user.setIcon(imagePath);
+        user.setNickname(userRequest.getName());
         userRepository.save(user);
         UserResponse userResponse=new UserResponse(user.getNickname(),user.getIcon());
         return serverResponse.success("프로필을 수정했습니다.",userResponse);
     }
     public User findUser(Long id){
         return userRepository.findById(id).orElse(null);
+    }
+    public ServerResponse inquiryUser(Long id, InquiryRequest inquiryRequest){
+        User user=findUser(id);
+        Inquiry inquiry=new Inquiry();
+        inquiry.setUser(user);
+        inquiry.setEmail(inquiryRequest.getEmail());
+        inquiry.setTitle(inquiryRequest.getTitle());
+        inquiry.setContents(inquiryRequest.getContents());
+        inquiryRepository.save(inquiry);
+        return serverResponse.success("문의가 접수되었습니다.");
     }
 }

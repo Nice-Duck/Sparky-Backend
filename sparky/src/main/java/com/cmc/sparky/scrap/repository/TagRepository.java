@@ -11,7 +11,7 @@ import java.util.List;
 @Repository
 public interface TagRepository extends JpaRepository<Tag, Long> {
     Tag findByNameAndUser(String name, User user);
-    List<Tag> findAllByUserOrderByIdDesc(User user);
+    List<Tag> findAllByUserAndIsDeletedOrderByIdDesc(User user, Boolean isDeleted);
     @Query(value="select t.name from Tag t where t.user=:user")
     List<String> findNameByUser(User user);
     List<Tag> findAllByUser(User user);
