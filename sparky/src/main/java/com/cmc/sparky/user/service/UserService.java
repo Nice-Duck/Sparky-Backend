@@ -7,9 +7,12 @@ import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.cmc.sparky.common.dto.ServerResponse;
 import com.cmc.sparky.common.exception.ConflictException;
 import com.cmc.sparky.common.exception.ErrorCode;
+import com.cmc.sparky.user.domain.Inquiry;
 import com.cmc.sparky.user.domain.User;
+import com.cmc.sparky.user.dto.InquiryRequest;
 import com.cmc.sparky.user.dto.UserRequest;
 import com.cmc.sparky.user.dto.UserResponse;
+import com.cmc.sparky.user.repository.InquiryRepository;
 import com.cmc.sparky.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -26,6 +29,7 @@ public class UserService {
 
     private final AmazonS3Client amazonS3Client;
     private final UserRepository userRepository;
+    private final InquiryRepository inquiryRepository;
     private ServerResponse serverResponse=new ServerResponse();
     public ServerResponse dupName(String name){
         if(userRepository.existsByNickname(name)){
@@ -60,5 +64,15 @@ public class UserService {
     }
     public User findUser(Long id){
         return userRepository.findById(id).orElse(null);
+    }
+    public ServerResponse inquiryUser(Long id, InquiryRequest inquiryRequest){
+        User user=findUser(id);
+        Inquiry inquiry=new Inquiry();
+        inquiry.setUser(user);
+        inquiry.setEmail(inquiryRequest.getEmail());
+        inquiry.setTitle(inquiryRequest.getTitle());
+        inquiry.setContents(inquiryRequest.getContents());
+        inquiryRepository.save(inquiry);
+        return serverResponse.success("문의가 접수되었습니다.");
     }
 }

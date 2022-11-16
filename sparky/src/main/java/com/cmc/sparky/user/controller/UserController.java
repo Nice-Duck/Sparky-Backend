@@ -2,6 +2,7 @@ package com.cmc.sparky.user.controller;
 
 import com.cmc.sparky.common.dto.ServerResponse;
 import com.cmc.sparky.common.service.JwtService;
+import com.cmc.sparky.user.dto.InquiryRequest;
 import com.cmc.sparky.user.dto.UserRequest;
 import com.cmc.sparky.user.dto.UserResponse;
 import com.cmc.sparky.user.service.UserService;
@@ -33,10 +34,18 @@ public class UserController {
     @ApiOperation(value="마이페이지 수정",notes = "<strong>수정 완료되었습니다.</strong>")
     @PatchMapping("")
     public ResponseEntity<ServerResponse<UserResponse>> userUpdate(@RequestHeader("Authorization") String token,
-                                                           @ModelAttribute UserRequest userRequest) throws Exception{
+        @ModelAttribute UserRequest userRequest) throws Exception{
         jwtService.validateToken(token);
         Long uid=jwtService.getUserId(token);
         return ResponseEntity.ok().body(userService.updateUser(uid,userRequest));
+    }
+    @ApiOperation(value="문의사항",notes = "<strong>문의사항 입니다.</strong>")
+    @PostMapping("/inquiry")
+    public ResponseEntity<ServerResponse<Void>> userInquiry(@RequestHeader("Authorization") String token,
+        @RequestBody InquiryRequest inquiryRequest){
+        jwtService.validateToken(token);
+        Long uid=jwtService.getUserId(token);
+        return ResponseEntity.ok().body(userService.inquiryUser(uid,inquiryRequest));
     }
 
 }
