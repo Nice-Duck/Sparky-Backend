@@ -43,6 +43,9 @@ public class UserService {
         return serverResponse.success("사용자 이름과 아이콘 주소를 불러왔습니다.",userResponse);
     }
     public ServerResponse updateUser(Long uid, UserRequest userRequest) throws Exception {
+        if(userRepository.existsByNickname(userRequest.getName())){
+            throw new ConflictException(ErrorCode.DUPLICATE_NICKNAME);
+        }
         MultipartFile multipartFile=userRequest.getIcon();
         String originalName = multipartFile.getOriginalFilename(); // 파일 이름
         long size = multipartFile.getSize(); // 파일 크기
@@ -58,6 +61,7 @@ public class UserService {
         String imagePath = amazonS3Client.getUrl(S3Bucket, originalName).toString(); // 접근가능한 URL 가져오기
         User user=userRepository.findById(uid).orElse(null);
         user.setIcon(imagePath);
+        user.setNickname(userRequest.getName());
         userRepository.save(user);
         UserResponse userResponse=new UserResponse(user.getNickname(),user.getIcon());
         return serverResponse.success("프로필을 수정했습니다.",userResponse);
