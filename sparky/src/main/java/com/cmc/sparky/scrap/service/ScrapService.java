@@ -147,7 +147,7 @@ public class ScrapService {
     }
     public ServerResponse loadTags(Long uid){
         User user=userRepository.findById(uid).orElse(null);
-        List<Tag> tags=tagRepository.findAllByUserOrderByIdDesc(user);
+        List<Tag> tags=tagRepository.findAllByUserAndIsDeletedOrderByIdDesc(user,false);
         List<TagResponse> tagsResponses=new ArrayList<>();
         for (Tag tag: tags){
             tagsResponses.add(new TagResponse(tag.getId(),tag.getName(),tag.getColor()));
@@ -254,6 +254,23 @@ public class ScrapService {
         TagResponse tagResponse=new TagResponse(tag.getId(),tag.getName(),tag.getColor());
         return serverResponse.success("태그를 성공적으로 수정했습니다.",tagResponse);
     }
-
+    public ServerResponse deleteTag(Long tid){
+        Tag tag=tagRepository.findById(tid).orElse(null);
+        tag.setIsDeleted(true);
+        List<ScrapMap> scrapMaps=scrapMapRepository.findAllByTag(tag);
+        List<Scrap> scraps=new ArrayList<>();
+        for(ScrapMap scrapMap : scrapMaps){
+            scraps.add(scrapMap.getScrap());
+            scrapMapRepository.delete(scrapMap);
+        }
+        for(Scrap scrap: scraps){
+            List<ScrapMap> scrapTemp=scrapMapRepository.findAllByScrap(scrap);
+            if(scrapTemp.size()==0){
+                scrap.setUsed(0);
+                scrapRepository.save(scrap);
+            }
+        }
+        return serverResponse.success("태그를 성공적으로 삭제했습니다.");
+    }
 
 }

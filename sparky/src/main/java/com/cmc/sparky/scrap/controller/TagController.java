@@ -7,7 +7,6 @@ import com.cmc.sparky.scrap.dto.TagResponse;
 import com.cmc.sparky.scrap.dto.TagUpdateRequest;
 import com.cmc.sparky.scrap.dto.TagsResponse;
 import com.cmc.sparky.scrap.service.ScrapService;
-import com.cmc.sparky.user.service.UserService;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -42,5 +41,12 @@ public class TagController {
         jwtService.validateToken(token);
         Long uid=jwtService.getUserId(token);
         return ResponseEntity.ok().body(scrapService.updateTag(uid, tagUpdateRequest));
+    }
+    @ApiOperation(value="태그 삭제하기",notes = "<strong>태그를 삭제함</strong>")
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ServerResponse<Void>> tagDelete(@RequestHeader("Authorization") String token,
+        @PathVariable("id") Long tid){
+        jwtService.validateToken(token);
+        return ResponseEntity.ok().body(scrapService.deleteTag(tid));
     }
 }
