@@ -147,13 +147,13 @@ public class ScrapService {
     }
     public ServerResponse loadTags(Long uid){
         User user=userRepository.findById(uid).orElse(null);
-        List<Tag> tags=tagRepository.findAllByUserOrderByIdDesc(user);
+        List<Tag> tags=tagRepository.findAllByUserAndIsDeletedOrderByIdDesc(user,false);
         List<TagResponse> tagsResponses=new ArrayList<>();
         for (Tag tag: tags){
             tagsResponses.add(new TagResponse(tag.getId(),tag.getName(),tag.getColor()));
         }
         TagsResponse tagsResponse=new TagsResponse(tagsResponses);
-        return serverResponse.success("최근 사용한 태그 목록을 출력합니다.", tagsResponse);
+        return serverResponse.success("최신순으로 모든 태그를 출력합니다.", tagsResponse);
     }
     public List<ScrapResponse> findScrap(Long uid, Integer size, Long other, Integer type){
         User user=userRepository.findById(uid).orElse(null);
@@ -243,6 +243,34 @@ public class ScrapService {
 
         return serverResponse.success("신고 완료되었습니다.");
     }
-
+    public ServerResponse updateTag(Long uid,TagUpdateRequest tagUpdateRequest){
+        User user=userRepository.findById(uid).orElse(null);
+        Tag tag=tagRepository.findById(tagUpdateRequest.getTagId()).orElse(null);
+        if(tagRepository.findByNameAndUser(tagUpdateRequest.getName(),user)!=null){
+            throw new ConflictException(ErrorCode.DUPLICATE_TAG);
+        }
+        tag.setName(tagUpdateRequest.getName());
+        tagRepository.save(tag);
+        TagResponse tagResponse=new TagResponse(tag.getId(),tag.getName(),tag.getColor());
+        return serverResponse.success("태그를 성공적으로 수정했습니다.",tagResponse);
+    }
+    public ServerResponse deleteTag(Long tid){
+        Tag tag=tagRepository.findById(tid).orElse(null);
+        tag.setIsDeleted(true);
+        List<ScrapMap> scrapMaps=scrapMapRepository.findAllByTag(tag);
+        List<Scrap> scraps=new ArrayList<>();
+        for(ScrapMap scrapMap : scrapMaps){
+            scraps.add(scrapMap.getScrap());
+            scrapMapRepository.delete(scrapMap);
+        }
+        for(Scrap scrap: scraps){
+            List<ScrapMap> scrapTemp=scrapMapRepository.findAllByScrap(scrap);
+            if(scrapTemp.size()==0){
+                scrap.setUsed(0);
+                scrapRepository.save(scrap);
+            }
+        }
+        return serverResponse.success("태그를 성공적으로 삭제했습니다.");
+    }
 
 }
